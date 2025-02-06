@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
         mimeDataInput: document.getElementById('mimeDataInput'),
         facetimeInput: document.getElementById('facetimeInput'),
         addressInput: document.getElementById('addressInput'),
-        homeKitCodeInput: document.getElementById('homeKitCodeInput')
+        homeKitCodeInput: document.getElementById('homeKitCodeInput'),
+        filenameInput: document.getElementById('filenameInput')
     };
 
     let lastInputData = ''; // Store the last input data globally
@@ -730,9 +731,13 @@ Pages read: ${this.getNfcPageCount()}`;
     function generateFilename() {
         const tagType = document.getElementById('tagType').value;
         const sanitizedInputData = sanitizeFilename(lastInputData);
+        if (!inputs.filenameInput.value) { // Generate filename if not provided
         let filename = `nfc_${tagType.toLowerCase()}_${sanitizedInputData}`;
         if (filename.length > 50) {
             filename = filename.substring(0, 50);
+        }
+        }else{ // Use provided filename
+            filename = inputs.filenameInput.value;
         }
         return filename;
     }
@@ -870,17 +875,19 @@ Pages read: ${this.getNfcPageCount()}`;
 
         let filename = 'nfc_tag';
         const selectedType = tagTypeSelect.value;
-
-        if (lastInputData) {
-            const sanitizedInputData = sanitizeFilename(lastInputData);
-            filename = `nfc_${selectedType.toLowerCase()}_${sanitizedInputData}`;
-            if (filename.length > 50) {
-                filename = filename.substring(0, 50);
+        if (!filenameInput.value) { // Generate filename if not provided
+            if (lastInputData) {
+                const sanitizedInputData = sanitizeFilename(lastInputData);
+                filename = `nfc_${selectedType.toLowerCase()}_${sanitizedInputData}`;
+                if (filename.length > 50) {
+                    filename = filename.substring(0, 50);
+                }
+            } else {
+                filename = `nfc_${selectedType.toLowerCase()}`;
             }
-        } else {
-            filename = `nfc_${selectedType.toLowerCase()}`;
+        }else { // Use provided filename
+            filename = filenameInput.value;
         }
-
         a.download = `${filename}.nfc`;
         document.body.appendChild(a);
         a.click();
