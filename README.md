@@ -1,114 +1,115 @@
-# NFC Tag Generator
+# Flipper NFC Maker Plus
 
-This project provides a simple web-based tool for generating NFC tag data compatible with Flipper Zero devices. Users can create NFC tags for URLs, phone numbers, and text, which can then be used with Flipper Zero for various NFC interactions.
+> A fork of [jaylikesbunda/Flipper-NFC-Maker](https://github.com/jaylikesbunda/Flipper-NFC-Maker) — a client-side web app for generating Flipper Zero `.nfc` tag files.
 
-## Features
+**This fork adds:** iOS-compatible business card NFC tags, a visual refresh, bug fixes, multi-NTAG type support with correct specifications, and a modernised codebase.
 
+**License:** [GNU General Public License v3](LICENSE) — see [Licensing](#licensing) below.
 
-- Compatible with Flipper Zero NFC format
-- Dynamic file naming based on input data
-- Dark mode toggle for better visibility
-- Downloadable .nfc files
+---
 
-### Supported NFC Types
+## ✨ What's New in This Fork
 
-1. **URL**
-   - Generates a URL record with appropriate URI prefixes
-   - Supports schemes: http, https, ftp, ftps, sftp
-   - Automatically applies efficient URI prefixes
-   - Example: `https://www.example.com`
+| Feature | Description |
+|---------|-------------|
+| **iOS Business Card (VCF/vCard)** | Dual-record NDEF tag: embeds full vCard for Android + URL record for iOS Safari |
+| **Bug fixes** | Fixed BCC0 calculation, CC bytes, Mifare version per NTAG type, long-form NDEF records |
+| **NTAG213/215/216 support** | Correct specifications for all three tag types with live capacity checking |
+| **Visual refresh** | Navy + teal colour scheme, dark/light mode with system preference detection |
+| **No external dependencies** | System fonts, no Google Fonts, no analytics — works fully offline |
+| **Restructured codebase** | Modular JS files, JSDoc annotations, AI-development-friendly |
 
-2. **Phone**
-   - Creates a telephone number record
-   - Uses "tel:" URI scheme
-   - Supports international formats
-   - Example: `+1234567890`
+## 🚀 Quick Start
 
-3. **Text**
-   - Produces a plain text record
-   - UTF-8 encoding
-   - Includes language code (default: "en")
-   - Suitable for short messages
+1. **Clone** the repo (or download the ZIP):
+   ```bash
+   git clone https://github.com/PBNZ/Flipper-NFC-Maker-Plus.git
+   ```
+2. **Open** `src/index.html` in any modern browser
+3. **Done** — no build step, no server, no dependencies
 
-4. **Email**
-   - Generates an email address record
-   - Uses "mailto:" URI scheme
-   - Example: `example@example.com`
+## 📋 Features
 
-5. **WiFi**
-   - Creates a WiFi configuration record
-   - Includes SSID, password, authentication type
-   - Format: `SSID:YourNetwork;PASSWORD:YourPassword;AUTH:WPA`
+### Standard NFC Tag Types
+- **URL** — with efficient URI prefix compression
+- **Phone, Email, SMS** — tel:, mailto:, sms: URI schemes
+- **Wi-Fi Configuration** — SSID, password, auth type
+- **Contact (vCard)** — paste raw vCard data
+- **Geo Location** — latitude/longitude coordinates
+- **Launch Application** — Android Application Records
+- **Custom MIME** — arbitrary MIME type + payload
+- **Social Media Links** — optimised URL records
+- **FaceTime / FaceTime Audio** — iOS-specific
+- **Apple Maps, HomeKit** — iOS-specific
+- **Send to Flipper** — WebSerial direct transfer (Chrome desktop)
 
-6. **Contact (vCard)**
-   - Generates a vCard 3.0 record
-   - Includes name, phone, email, etc.
-   - Example:
-     ```
-     BEGIN:VCARD
-     VERSION:3.0
-     N:Doe;John
-     TEL:+1234567890
-     EMAIL:john@example.com
-     END:VCARD
-     ```
+### iOS Compatible Business Card (NEW)
+1. Enter a URL to your hosted `.vcf` file
+2. App fetches and parses the vCard (with paste fallback for CORS)
+3. Preview parsed contact fields
+4. Select tag type with live capacity bar (NTAG213/215/216)
+5. Generate a dual-record `.nfc` file:
+   - Record 1: `text/vcard` MIME (Android reads directly)
+   - Record 2: URL to hosted VCF (iOS opens in Safari)
 
-7. **Geo (Geographic location)**
-   - Creates a location record
-   - Uses "geo:" URI scheme
-   - Format: `geo:37.7749,-122.4194`
+## 🌐 Deployment Options
 
-8. **SMS**
-   - Generates an SMS record
-   - Includes phone number and optional message
-   - Format: `sms:+1234567890?body=Hello%20World`
+This app works in **all** of these scenarios without modification:
 
-9. **LaunchApp (Android Application Record)**
-   - Creates an Android Application Record
-   - Requires package name
-   - Example: `com.example.myapp`
+| Method | Instructions |
+|--------|-------------|
+| **Local file** | Open `src/index.html` directly (file:// protocol) |
+| **Web server** | Copy `src/` contents to your web root |
+| **GitHub Pages** | Enable Pages on the `main` branch, set source to `src/` |
+| **S3 / CloudFront** | Upload `src/` contents to your bucket |
+| **IIS** | Copy `src/` contents to `wwwroot` |
 
-10. **CustomMIME**
-    - Allows custom MIME type records
-    - Format:
-      ```
-      application/x-myapp
-      Custom data here
-      ```
+All paths are relative — no configuration needed.
 
-11. **SocialMedia**
-    - Treated as a special URL type
-    - Optimized for social media links
-    - Example: `https://twitter.com/yourprofile`
+## 🗂️ Project Structure
 
-## Usage
+```
+├── src/
+│   ├── index.html              # Main application
+│   ├── css/styles.css          # Styles (dark/light theme)
+│   └── js/
+│       ├── app.js              # UI logic, event handlers
+│       ├── nfc-generator.js    # NFC/NDEF byte-level generation
+│       ├── vcard-parser.js     # vCard parsing + preview
+│       ├── background.js       # Particle canvas animation
+│       └── serial.js           # WebSerial Flipper communication
+├── .github/workflows/deploy.yml
+├── .editorconfig
+├── .gitignore
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE                     # GPL v3 (original, unmodified)
+└── README.md
+```
 
-1. Open the `index.html` file in a web browser.
-2. Select the type of NFC tag you want to create (URL, Phone, or Text).
-3. Enter the data for your NFC tag in the input field.
-4. Click the "Generate NFC Data" button.
-5. Review the generated NFC data.
-6. Click the "Download NFC File" button to save the data as a .nfc file.
+## 🗺️ Roadmap
 
-## File Structure
+Future improvements (tracked as TODO comments in code):
+- [ ] Manual multi-record tag creation (arbitrary record types)
+- [ ] Enhanced vCard creation/editing UI (full wizard)
+- [ ] Direct VCF content creation without requiring a pre-hosted file
+- [ ] VCF hosting service integration
 
-- `index.html`: The main HTML file containing the user interface.
-- `styles.css`: CSS file for styling the web interface.
-- `script.js`: JavaScript file containing the NFC data generation logic.
+## 🤝 Contributing
 
-## Technical Details
+See [CONTRIBUTING.md](CONTRIBUTING.md) for repo layout, coding conventions, and how to add new NFC record types.
 
-The NFC tag generator creates data for NTAG215 chips, which are commonly used in NFC applications. The generated data follows the NDEF (NFC Data Exchange Format) specification and is formatted to be compatible with Flipper Zero devices.
+## 📜 Licensing
 
+This project is licensed under the **GNU General Public License v3**.
 
-## Contributing
+```
+Original work Copyright (c) jaylikesbunda
+Modifications Copyright (c) PBNZ 2026
+```
 
-Contributions to improve the NFC Tag Generator are welcome. Please feel free to submit pull requests or create issues for bugs and feature requests.
+The full license text is in the [LICENSE](LICENSE) file. All source files include a GPL header comment. This fork complies with GPL v3 requirements — source code is publicly available and the original license is preserved.
 
-## License
+## ⚠️ Disclaimer
 
-This project is open source and available under the [GNU License](LICENSE).
-
-## Disclaimer
-
-This tool is for educational and personal use only. Ensure you have the right to create and use NFC tags before deploying them in any environment. The creators of this tool are not responsible for any misuse or illegal activities conducted with NFC tags generated by this software.
+This tool is for educational and personal use only. Ensure you have the right to create and use NFC tags before deploying them. The creators are not responsible for any misuse.

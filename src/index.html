@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<!--
+  Flipper NFC Maker Plus
+  A fork of Flipper-NFC-Maker by jaylikesbunda.
+
+  Original work Copyright (c) jaylikesbunda
+  Modifications Copyright (c) PBNZ 2026
+
+  Licensed under the GNU General Public License v3.
+  See LICENSE file for details.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flipper NFC Maker Plus — NFC Tag Generator</title>
+    <meta name="description" content="Generate Flipper Zero .nfc tag files for URLs, contacts, Wi-Fi, business cards, and more. Supports NTAG213, NTAG215, and NTAG216.">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+
+    <div class="container">
+        <!-- ============================================================
+             HEADER / BRANDING
+             ============================================================ -->
+        <header class="app-header">
+            <h1 class="app-title">Flipper NFC Maker Plus</h1>
+            <p class="app-subtitle">
+                NFC tag generator for Flipper Zero &mdash;
+                forked from <a href="https://github.com/jaylikesbunda/Flipper-NFC-Maker" target="_blank" rel="noopener">jaylikesbunda/Flipper-NFC-Maker</a>
+            </p>
+        </header>
+
+        <!-- ============================================================
+             MAIN CONTENT
+             ============================================================ -->
+        <main>
+            <!-- NFC Tag Type (NTAG chip) Selection -->
+            <div class="input-group">
+                <label for="nfcTagTypeSelect">NFC Tag Type</label>
+                <select id="nfcTagTypeSelect">
+                    <option value="NTAG213">NTAG213 (144B)</option>
+                    <option value="NTAG215" selected>NTAG215 (504B)</option>
+                    <option value="NTAG216">NTAG216 (888B)</option>
+                </select>
+            </div>
+
+            <!-- Record/Content Type Selection -->
+            <div class="input-group">
+                <label for="tagType">Record Type</label>
+                <select id="tagType">
+                    <option value="URL">URL [iOS, Android]</option>
+                    <option value="Text">Plain Text [Android]</option>
+                    <option value="Phone">Phone Number [iOS, Android]</option>
+                    <option value="Email">Email [iOS, Android]</option>
+                    <option value="WiFi">Wi-Fi Configuration [Android]</option>
+                    <option value="Contact">Contact (vCard) [Android]</option>
+                    <option value="Geo">Geo Location [iOS, Android]</option>
+                    <option value="SMS">SMS Message [iOS, Android]</option>
+                    <option value="LaunchApp">Launch Application [Android]</option>
+                    <option value="CustomMIME">Custom MIME Type [Android]</option>
+                    <option value="SocialMedia">Social Media Link [iOS, Android]</option>
+                    <option value="FaceTime">FaceTime [iOS]</option>
+                    <option value="FaceTimeAudio">FaceTime Audio [iOS]</option>
+                    <option value="AppleMaps">Apple Maps [iOS]</option>
+                    <option value="HomeKit">HomeKit Setup [iOS]</option>
+                    <option value="iOSBusinessCard">iOS Compatible Business Card (VCF) ✨</option>
+                </select>
+            </div>
+
+            <!-- ========================================================
+                 DYNAMIC INPUT FIELDS (standard tag types)
+                 ======================================================== -->
+            <div id="inputFields">
+                <!-- FaceTime -->
+                <div class="input-group data-field" data-type="FaceTime FaceTimeAudio">
+                    <label for="facetimeInput">User Identifier (Email or Phone)</label>
+                    <input id="facetimeInput" type="text" placeholder="user@example.com">
+                </div>
+
+                <!-- Apple Maps -->
+                <div class="input-group data-field" data-type="AppleMaps">
+                    <label for="addressInput">Address</label>
+                    <input id="addressInput" type="text" placeholder="Apple Park, Cupertino, CA">
+                </div>
+
+                <!-- HomeKit -->
+                <div class="input-group data-field" data-type="HomeKit">
+                    <label for="homeKitCodeInput">HomeKit Code</label>
+                    <input id="homeKitCodeInput" type="text" placeholder="12345678">
+                </div>
+
+                <!-- URL -->
+                <div class="input-group data-field" data-type="URL SocialMedia">
+                    <label for="urlInput">URL</label>
+                    <input id="urlInput" type="text" placeholder="https://example.com">
+                </div>
+
+                <!-- Text -->
+                <div class="input-group data-field" data-type="Text">
+                    <label for="textInput">Text</label>
+                    <textarea id="textInput" placeholder="Enter your text here"></textarea>
+                </div>
+
+                <!-- Phone -->
+                <div class="input-group data-field" data-type="Phone">
+                    <label for="phoneInput">Phone Number</label>
+                    <input id="phoneInput" type="text" placeholder="+1234567890">
+                </div>
+
+                <!-- Email -->
+                <div class="input-group data-field" data-type="Email">
+                    <label for="emailInput">Email Address</label>
+                    <input id="emailInput" type="email" placeholder="example@example.com">
+                </div>
+
+                <!-- Wi-Fi -->
+                <div class="input-group data-field" data-type="WiFi">
+                    <label for="ssidInput">Wi-Fi SSID</label>
+                    <input id="ssidInput" type="text" placeholder="YourNetwork">
+                </div>
+                <div class="input-group data-field" data-type="WiFi">
+                    <label for="passwordInput">Wi-Fi Password</label>
+                    <input id="passwordInput" type="text" placeholder="YourPassword">
+                </div>
+                <div class="input-group data-field" data-type="WiFi">
+                    <label for="authTypeSelect">Authentication Type</label>
+                    <select id="authTypeSelect">
+                        <option value="WPA">WPA/WPA2</option>
+                        <option value="WEP">WEP</option>
+                        <option value="NONE">None</option>
+                    </select>
+                </div>
+
+                <!-- Contact (vCard) -->
+                <div class="input-group data-field" data-type="Contact">
+                    <label for="contactInput">Contact (vCard)</label>
+                    <textarea id="contactInput" placeholder="BEGIN:VCARD&#10;VERSION:3.0&#10;N:Doe;John&#10;TEL:+1234567890&#10;END:VCARD"></textarea>
+                </div>
+
+                <!-- Geo Location -->
+                <div class="input-group data-field" data-type="Geo">
+                    <label for="latitudeInput">Latitude</label>
+                    <input id="latitudeInput" type="text" placeholder="37.7749">
+                </div>
+                <div class="input-group data-field" data-type="Geo">
+                    <label for="longitudeInput">Longitude</label>
+                    <input id="longitudeInput" type="text" placeholder="-122.4194">
+                </div>
+
+                <!-- SMS -->
+                <div class="input-group data-field" data-type="SMS">
+                    <label for="smsNumberInput">Phone Number</label>
+                    <input id="smsNumberInput" type="text" placeholder="+1234567890">
+                </div>
+                <div class="input-group data-field" data-type="SMS">
+                    <label for="smsBodyInput">Message Body</label>
+                    <textarea id="smsBodyInput" placeholder="Hello World"></textarea>
+                </div>
+
+                <!-- Launch Application -->
+                <div class="input-group data-field" data-type="LaunchApp">
+                    <label for="packageNameInput">Package Name</label>
+                    <input id="packageNameInput" type="text" placeholder="com.example.myapp">
+                </div>
+
+                <!-- Custom MIME -->
+                <div class="input-group data-field" data-type="CustomMIME">
+                    <label for="mimeTypeInput">MIME Type</label>
+                    <input id="mimeTypeInput" type="text" placeholder="application/myapp">
+                </div>
+                <div class="input-group data-field" data-type="CustomMIME">
+                    <label for="mimeDataInput">Data</label>
+                    <textarea id="mimeDataInput" placeholder="Your custom data here"></textarea>
+                </div>
+            </div>
+
+            <!-- Filename -->
+            <div class="input-group" id="filenameGroup">
+                <label for="filenameInput">Filename (optional)</label>
+                <input id="filenameInput" type="text" placeholder="nfc_filename">
+            </div>
+
+            <!-- Generate Button (standard tags) -->
+            <button id="generateButton" class="btn">Generate NFC Tag</button>
+
+            <!-- ========================================================
+                 iOS COMPATIBLE BUSINESS CARD SECTION
+                 ======================================================== -->
+            <div id="businessCardSection" style="display: none;">
+                <h3 class="section-title">iOS Compatible Business Card</h3>
+                <p class="section-description">
+                    Generate a dual-record NFC tag that works on both iOS and Android.
+                    Requires a publicly hosted .vcf file URL. iOS reads the URL record
+                    and opens the VCF in Safari; Android reads the embedded vCard directly.
+                </p>
+
+                <!-- VCF URL + Fetch -->
+                <div class="fetch-row">
+                    <div class="input-group">
+                        <label for="vcfUrlInput">Hosted VCF File URL</label>
+                        <input id="vcfUrlInput" type="url" placeholder="https://example.com/contact.vcf">
+                    </div>
+                    <button id="fetchVcfButton" class="btn btn-small">Fetch VCF</button>
+                </div>
+
+                <!-- Paste Fallback -->
+                <div id="vcfPasteArea" class="paste-area" style="display: none;">
+                    <p class="paste-hint">Paste your VCF content below:</p>
+                    <textarea id="vcfPasteTextarea" placeholder="BEGIN:VCARD&#10;VERSION:3.0&#10;FN:Jane Doe&#10;ORG:Example Corp&#10;TEL:+1234567890&#10;EMAIL:jane@example.com&#10;END:VCARD" rows="8"></textarea>
+                </div>
+
+                <!-- vCard Preview -->
+                <div id="vcardPreview" class="vcard-preview" style="display: none;"></div>
+
+                <!-- Tag Type + Capacity -->
+                <div class="capacity-section">
+                    <p class="tag-recommendation">ℹ️ We recommend NTAG216 for business cards (888B capacity).</p>
+                    <div class="input-group">
+                        <label for="bcNfcTagTypeSelect">Tag Type</label>
+                        <select id="bcNfcTagTypeSelect">
+                            <option value="NTAG213">NTAG213 (144B)</option>
+                            <option value="NTAG215">NTAG215 (504B)</option>
+                            <option value="NTAG216" selected>NTAG216 (888B)</option>
+                        </select>
+                    </div>
+                    <div class="capacity-bar-container">
+                        <div id="capacityBar" class="capacity-bar-fill"></div>
+                    </div>
+                    <p id="capacityText" class="capacity-text">0 / 888 bytes</p>
+                </div>
+
+                <!-- Generate Business Card Button -->
+                <button id="generateBcButton" class="btn" style="width: 100%; margin-top: 1rem;">
+                    Generate Business Card NFC Tag
+                </button>
+
+                <!-- Business Card Output -->
+                <div id="bcOutputSection" class="hidden"></div>
+            </div>
+
+            <!-- Standard Output -->
+            <div id="outputSection" class="hidden">
+                <h2>Generated NFC Tag Data</h2>
+                <pre id="nfcData"></pre>
+                <button id="downloadButton" class="btn">Download .nfc File</button>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             FOOTER
+             ============================================================ -->
+        <footer class="app-footer">
+            <button id="themeToggle" class="theme-toggle">☀️ Light Mode</button>
+            <p class="footer-credit">
+                Flipper NFC Maker Plus &mdash;
+                <a href="https://github.com/jaylikesbunda/Flipper-NFC-Maker" target="_blank" rel="noopener">Original by jaylikesbunda</a>
+                &middot; Licensed under <a href="../LICENSE">GPL v3</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- WebSerial Not Available Modal -->
+    <div class="modal-overlay" id="webSerialModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Can't Connect to Flipper</h2>
+            </div>
+            <div class="modal-body">
+                <p>WebSerial connection is not available because:</p>
+                <ul>
+                    <li>You're using a mobile device, or</li>
+                    <li>Your browser doesn't support WebSerial</li>
+                </ul>
+                <p>To connect to your Flipper, please use Chrome on a desktop computer.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-close">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts — order matters (no modules, file:// compatible) -->
+    <script src="js/nfc-generator.js"></script>
+    <script src="js/vcard-parser.js"></script>
+    <script src="js/background.js"></script>
+    <script src="js/serial.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

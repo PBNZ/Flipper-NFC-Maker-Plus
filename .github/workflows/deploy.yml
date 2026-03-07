@@ -1,0 +1,101 @@
+# Flipper NFC Maker Plus — CI/CD Pipeline
+#
+# Runs on push to main: validates JS syntax and HTML structure.
+# Includes commented-out examples for GitHub Pages and S3 deployment.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate JavaScript syntax
+        run: |
+          echo "Checking JS files for syntax errors..."
+          for file in src/js/*.js; do
+            echo "  Checking $file"
+            node --check "$file"
+          done
+          echo "All JS files passed syntax check."
+
+      - name: Validate HTML structure
+        run: |
+          echo "Checking HTML files..."
+          # Basic validation: ensure DOCTYPE, html, head, body tags exist
+          for file in src/*.html; do
+            echo "  Checking $file"
+            if ! grep -qi '<!DOCTYPE html>' "$file"; then
+              echo "ERROR: $file missing DOCTYPE"
+              exit 1
+            fi
+            if ! grep -qi '<html' "$file"; then
+              echo "ERROR: $file missing <html> tag"
+              exit 1
+            fi
+            if ! grep -qi '</html>' "$file"; then
+              echo "ERROR: $file missing closing </html> tag"
+              exit 1
+            fi
+          done
+          echo "All HTML files passed validation."
+
+  # ============================================================
+  # DEPLOYMENT OPTIONS (uncomment the one you need)
+  # ============================================================
+
+  # --- GitHub Pages ---
+  # deploy-pages:
+  #   needs: validate
+  #   if: github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     pages: write
+  #     id-token: write
+  #   environment:
+  #     name: github-pages
+  #     url: ${{ steps.deployment.outputs.page_url }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup Pages
+  #       uses: actions/configure-pages@v4
+  #     - name: Upload artifact
+  #       uses: actions/upload-pages-artifact@v3
+  #       with:
+  #         path: 'src/'
+  #     - name: Deploy to GitHub Pages
+  #       id: deployment
+  #       uses: actions/deploy-pages@v4
+
+  # --- AWS S3 ---
+  # deploy-s3:
+  #   needs: validate
+  #   if: github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: us-east-1
+  #     - name: Sync to S3
+  #       run: aws s3 sync src/ s3://${{ secrets.S3_BUCKET_NAME }}/ --delete
+
+  # --- IIS ---
+  # For IIS deployment, simply copy the contents of src/ to your
+  # wwwroot directory. No CI/CD step needed — use your existing
+  # Windows deployment pipeline or manual copy.
