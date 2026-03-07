@@ -93,7 +93,6 @@ Future improvements (tracked as TODO comments in code):
 - [ ] Manual multi-record tag creation (arbitrary record types)
 - [ ] Enhanced vCard creation/editing UI (full wizard)
 - [ ] Direct VCF content creation without requiring a pre-hosted file
-- [ ] VCF hosting service integration
 
 ## 🤝 Contributing
 
