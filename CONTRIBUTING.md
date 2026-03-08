@@ -69,6 +69,8 @@ This repo is intentionally structured for AI-assisted development:
 ### 🛑 AI Workflow Requirement
 **All AI agents MUST update `CHANGELOG.md` before committing or pushing changes to any branch.** Do not leave changelog updates as an afterthought.
 
+**All AI agents MUST obtain explicit user approval before pushing directly to the `main` branch.**
+
 ## License
 
 All contributions must be compatible with **GNU GPL v3**. Add the GPL header
