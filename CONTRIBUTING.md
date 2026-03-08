@@ -66,6 +66,9 @@ This repo is intentionally structured for AI-assisted development:
 - **`.editorconfig`** — consistent formatting regardless of editor/AI tool
 - **No build step** — changes are instantly testable
 
+### 🛑 AI Workflow Requirement
+**All AI agents MUST update `CHANGELOG.md` before committing or pushing changes to any branch.** Do not leave changelog updates as an afterthought.
+
 ## License
 
 All contributions must be compatible with **GNU GPL v3**. Add the GPL header
