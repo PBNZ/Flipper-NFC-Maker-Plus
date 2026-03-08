@@ -594,6 +594,28 @@ class NfcNtag {
         return messageLen + tlvOverhead;
     }
 
+    /**
+     * Calculate bytes needed for a single-record MIME NDEF message.
+     * Useful for checking capacity before generation.
+     *
+     * @param {string} payloadData - The payload data string.
+     * @param {string} mimeType - The MIME type string (e.g. 'text/vcard').
+     * @returns {number} Total bytes including TLV wrapper.
+     */
+    static calculateSingleRecordSize(payloadData, mimeType = 'text/vcard') {
+        const helper = new NfcHelper();
+        const payloadBytes = helper.stringToBytes(payloadData);
+        const typeBytes = helper.stringToBytes(mimeType);
+
+        // Record length: 1 (flags) + 1 (type len) + (1 or 4) (payload len) + type len + payload len
+        const recordLen = 1 + 1 + (payloadBytes.length < 256 ? 1 : 4) + typeBytes.length + payloadBytes.length;
+
+        // TLV overhead: 1 (NDEF type) + (1 or 3) (length) + 1 (TerminatorFE)
+        const tlvOverhead = 1 + (recordLen < 0xFF ? 1 : 3) + 1;
+
+        return recordLen + tlvOverhead;
+    }
+
     /* ------------------------------------------------------------------
      * Public: Export
      * ---------------------------------------------------------------- */

@@ -4,6 +4,8 @@
 
 **This fork adds:** iOS-compatible business card NFC tags, a visual refresh, bug fixes, multi-NTAG type support with correct specifications, and a modernised codebase.
 
+🌐 **Try it live:** [https://pbnz.github.io/Flipper-NFC-Maker-Plus/](https://pbnz.github.io/Flipper-NFC-Maker-Plus/)
+
 **License:** [GNU General Public License v3](LICENSE) — see [Licensing](#licensing) below.
 
 ---
@@ -12,10 +14,11 @@
 
 | Feature | Description |
 |---------|-------------|
-| **iOS Business Card (VCF/vCard)** | Dual-record NDEF tag: embeds full vCard for Android + URL record for iOS Safari |
+| **Advanced vCard Editor** | Full creation wizard for vCard 4.0 with real-time property editing |
+| **Intelligent Capacity Tracking** | Live visualization of remaining bytes with auto-switch suggestions for Tag Types |
 | **Bug fixes** | Fixed BCC0 calculation, CC bytes, Mifare version per NTAG type, long-form NDEF records |
 | **NTAG213/215/216 support** | Correct specifications for all three tag types with live capacity checking |
-| **Visual refresh** | Navy + teal colour scheme, dark/light mode with system preference detection |
+| **Visual refresh** | Modern Segmented Controls, navy + teal colour scheme, dark/light mode with system preference detection |
 | **No external dependencies** | System fonts, no Google Fonts, no analytics — works fully offline |
 | **Restructured codebase** | Modular JS files, JSDoc annotations, AI-development-friendly |
 
@@ -43,14 +46,11 @@
 - **Apple Maps, HomeKit** — iOS-specific
 - **Send to Flipper** — WebSerial direct transfer (Chrome desktop)
 
-### iOS Compatible Business Card (NEW)
-1. Enter a URL to your hosted `.vcf` file
-2. App fetches and parses the vCard (with paste fallback for CORS)
-3. Preview parsed contact fields
-4. Select tag type with live capacity bar (NTAG213/215/216)
-5. Generate a dual-record `.nfc` file:
-   - Record 1: `text/vcard` MIME (Android reads directly)
-   - Record 2: URL to hosted VCF (iOS opens in Safari)
+### Contact (vCard) [iOS+Android, Android] ✨
+1. Create vCards from scratch using the dynamic UI Editor or Import via URL/Paste.
+2. App natively parses and optimizes vCards to save NFC space.
+3. Automatically warns if payload exceeds NTAG type capacity, suggesting an upgrade.
+4. Generates a standard `text/vcard` payload OR a dual-record `.nfc` file (vCard + hosted VCF URL) for optimal iOS + Android compatibility.
 
 ## 🌐 Deployment Options
 
@@ -78,6 +78,9 @@ All paths are relative — no configuration needed.
 │       ├── vcard-parser.js     # vCard parsing + preview
 │       ├── background.js       # Particle canvas animation
 │       └── serial.js           # WebSerial Flipper communication
+├── tests/
+│   ├── logic_tests.js            # Core parser and generator unit tests
+│   └── generate-test-vcards.js   # Script to generate 150+ vCard 4.0 edge cases
 ├── .github/workflows/deploy.yml
 ├── .editorconfig
 ├── .gitignore
@@ -87,12 +90,27 @@ All paths are relative — no configuration needed.
 └── README.md
 ```
 
+## 🧪 Testing
+
+The project includes an extensive logic test suite that runs without a browser:
+```bash
+node tests/logic_tests.js
+```
+
+There is also a generator script that creates 150 comprehensive mock vCards covering all RFC 6350 properties, datatypes, and encoding edge cases (used to verify parser integrity):
+```bash
+node tests/generate-test-vcards.js
+```
+
 ## 🗺️ Roadmap
 
 Future improvements (tracked as TODO comments in code):
 - [ ] Manual multi-record tag creation (arbitrary record types)
-- [ ] Enhanced vCard creation/editing UI (full wizard)
-- [ ] Direct VCF content creation without requiring a pre-hosted file
+- [ ] VCF hosting service integration
+- [ ] PHOTO property: display photo from URL or base64-encoded data, convert URL to encoded, save encoded photo as file
+- [ ] LOGO property: display and edit organization logos (URL and encoded)
+- [ ] SOUND property: audio playback and editing support
+- [ ] KEY property: cryptographic key display and management
 
 ## 🤝 Contributing
 
